@@ -40,7 +40,11 @@ export default function Login() {
         if (user) {
           saveUser(user);
         }
-        navigate("/dashboard");
+        setMessage("Login successful. Redirecting to dashboard...");
+
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1500);
       } else {
         setError("Login succeeded but no token was returned.");
       }
@@ -174,6 +178,7 @@ export default function Login() {
 
             <button
               type="button"
+              onClick={() => navigate("/register")}
               className="text-sm text-blue-600 font-medium hover:underline"
             >
               Sign up

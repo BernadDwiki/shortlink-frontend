@@ -1,13 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import logo from "../assets/images/logo.png";
 import eyeIcon from "../assets/images/eye.png";
 
 import Footer from "../components/Footer";
 import { register } from "../services/authService";
-import { saveToken, saveUser } from "../utils/auth";
 
 export default function Register() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -40,19 +41,19 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const result = await register(email, password);
+      const user = await register(email, password);
 
-      const token = result?.token;
-      const user = result?.user;
+      if (user?.id) {
+        setMessage("Registration successful. Redirecting to login...");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
 
-      if (token) {
-        saveToken(token);
-        if (user) {
-          saveUser(user);
-        }
-        setMessage("Registration successful. You are now signed in.");
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
       } else {
-        setError("Registration succeeded but no token was returned.");
+        setError("Registration succeeded but no user data was returned.");
       }
     } catch (err) {
       setError(err.message || "Unable to complete registration. Please try again.");
@@ -213,6 +214,7 @@ export default function Register() {
 
             <button
               type="button"
+              onClick={() => navigate("/")}
               className="text-sm text-blue-600 font-medium hover:underline"
             >
               Log in
