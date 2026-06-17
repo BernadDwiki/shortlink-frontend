@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import logo from "../assets/images/logo.png";
+import logo from "../assets/images/logo2.png";
 import eyeIcon from "../assets/images/eye.png";
 
 import Footer from "../components/Footer";
