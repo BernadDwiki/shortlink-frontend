@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="w-full px-8 py-6 bg-amber-50">
+    <footer className="w-full px-24 py-6 bg-amber-50">
       <div className="flex items-center justify-between text-[12px] font-medium uppercase tracking-[0.15em] text-slate-500">
         <span>© 2024 ShortLink. The Digital Architect.</span>
 
@@ -25,3 +25,4 @@ export default function Footer() {
     </footer>
   );
 }
+

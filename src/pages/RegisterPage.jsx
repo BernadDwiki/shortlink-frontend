@@ -50,7 +50,7 @@ export default function Register() {
         setConfirmPassword("");
 
         setTimeout(() => {
-          navigate("/");
+          navigate("/login");
         }, 1500);
       } else {
         setError("Registration succeeded but no user data was returned.");
@@ -207,14 +207,14 @@ export default function Register() {
           </div>
 
           {/* Login Link */}
-          <div className="text-center mt-6">
+          <div className="text-center my-6">
             <span className="text-sm text-gray-500">
               Already have an account?{" "}
             </span>
 
             <button
               type="button"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/login")}
               className="text-sm text-blue-600 font-medium hover:underline"
             >
               Log in
