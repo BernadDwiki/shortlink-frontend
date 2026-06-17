@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import SweetAlert from "../components/ui/SweetAlert";
 
 import searchIcon from "../assets/images/search.png";
 import filterIcon from "../assets/images/filter.png";
@@ -14,6 +15,8 @@ export default function DashboardPage() {
   const [links, setLinks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [copiedId, setCopiedId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     const loadLinks = async () => {
@@ -47,18 +50,42 @@ export default function DashboardPage() {
     loadLinks();
   }, []);
 
-  const handleCopy = (url) => {
-    navigator.clipboard.writeText(url);
+  const handleCopy = async (url, id) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 1500);
+    } catch (err) {
+      setError(err.message || "Failed to copy URL");
+    }
   };
 
   const handleDelete = async (id) => {
-    if (confirm("Are you sure you want to delete this link?")) {
-      try {
-        await deleteLink(id);
-        setLinks(links.filter((link) => link.id !== id));
-      } catch (err) {
-        setError(err.message || "Failed to delete link");
-      }
+    const confirmed = await SweetAlert.confirm({
+      title: "Delete this link?",
+      text: "This action cannot be undone.",
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "Cancel",
+    });
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeletingId(id);
+      await deleteLink(id);
+      setLinks((currentLinks) => currentLinks.filter((link) => link.id !== id));
+      SweetAlert.success({
+        title: "Deleted!",
+        text: "Your link has been deleted.",
+      });
+    } catch (err) {
+      setError(err.message || "Failed to delete link");
+      SweetAlert.error({
+        text: err.message || "Failed to delete link",
+      });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -173,22 +200,28 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => handleCopy(link.shortUrl)}
-                      className="transition-transform hover:scale-105"
-                    >
-                      <img
-                        src={copyIcon}
-                        alt="Copy"
-                        className="w-10 h-10"
-                      />
-                    </button>
+                    <div className="flex flex-col items-center">
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(link.shortUrl, link.id)}
+                        className="transition-transform hover:scale-105"
+                      >
+                        <img
+                          src={copyIcon}
+                          alt="Copy"
+                          className="w-10 h-10"
+                        />
+                      </button>
+                      {copiedId === link.id && (
+                        <span className="text-xs text-green-600 mt-1">Copied</span>
+                      )}
+                    </div>
 
                     <button
                       type="button"
                       onClick={() => handleDelete(link.id)}
                       className="transition-transform hover:scale-105"
+                      disabled={deletingId === link.id}
                     >
                       <img
                         src={deleteIcon}
@@ -196,6 +229,9 @@ export default function DashboardPage() {
                         className="w-10 h-10"
                       />
                     </button>
+                    {deletingId === link.id && (
+                      <span className="text-xs text-gray-500 mt-1">Deleting...</span>
+                    )}
                   </div>
                 </div>
               ))}

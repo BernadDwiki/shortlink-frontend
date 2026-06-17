@@ -1,17 +1,33 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 import logo from "../assets/images/logo.png";
 import avatar from "../assets/images/avatar.png";
 import plusIcon from "../assets/images/plus-icon.png";
+import { getToken, getUser, removeToken, removeUser } from "../utils/auth";
 
 export default function Navbar() {
-  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+  const [token, setToken] = useState(getToken());
+  const [user, setUser] = useState(getUser());
+
+  useEffect(() => {
+    const onStorage = () => {
+      setToken(getToken());
+      setUser(getUser());
+    };
+
+    window.addEventListener("storage", onStorage);
+
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    window.location.href = "/";
+    removeToken();
+    removeUser();
+    setToken(null);
+    setUser(null);
+    navigate("/");
   };
 
   return (
@@ -81,9 +97,13 @@ export default function Navbar() {
 
             <img
               src={avatar}
-              alt="User"
+              alt={user?.email || "User"}
               className="w-8 h-8 rounded-full"
             />
+
+            {user?.email && (
+              <span className="text-sm text-gray-700">{user.email}</span>
+            )}
 
             <button
               onClick={handleLogout}
