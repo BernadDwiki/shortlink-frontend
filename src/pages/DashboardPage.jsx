@@ -13,6 +13,7 @@ import { getUserLinks, deleteLink } from "../services/linkService";
 
 export default function DashboardPage() {
   const [links, setLinks] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [copiedId, setCopiedId] = useState(null);
@@ -137,7 +138,9 @@ export default function DashboardPage() {
 
                 <input
                   type="text"
-                  placeholder="Search by name or URL..."
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="Search by URL or original address..."
                   className="w-full outline-none text-sm"
                 />
               </div>
@@ -165,9 +168,21 @@ export default function DashboardPage() {
           )}
 
           {/* Links List */}
-          {!loading && links.length > 0 && (
+          {!loading && (
             <div className="mt-8 space-y-4">
-              {links.map((link) => (
+              {links
+                .filter((link) => {
+                  const query = searchTerm.trim().toLowerCase();
+                  if (!query) {
+                    return true;
+                  }
+
+                  return (
+                    link.shortUrl.toLowerCase().includes(query) ||
+                    link.originalUrl.toLowerCase().includes(query)
+                  );
+                })
+                .map((link) => (
                 <div
                   key={link.id}
                   className="bg-white border border-gray-100 rounded-xl p-5 flex justify-between items-center"
