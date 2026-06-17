@@ -5,8 +5,7 @@ import logo from "../assets/images/logo.png";
 import googleIcon from "../assets/images/google.png";
 import eyeIcon from "../assets/images/eye.png";
 import Footer from "../components/Footer";
-import { login } from "../services/authService";
-import { saveToken, saveUser } from "../utils/auth";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -16,6 +15,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  const { login } = useAuth();
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -30,24 +31,12 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const result = await login(email, password);
+      await login(email, password);
+      setMessage("Login successful. Redirecting to dashboard...");
 
-      const token = result?.token;
-      const user = result?.user;
-
-      if (token) {
-        saveToken(token);
-        if (user) {
-          saveUser(user);
-        }
-        setMessage("Login successful. Redirecting to dashboard...");
-
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 1500);
-      } else {
-        setError("Login succeeded but no token was returned.");
-      }
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1500);
     } catch (err) {
       setError(err.message || "Unable to reach the backend. Please try again later.");
     } finally {

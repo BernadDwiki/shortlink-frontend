@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { getToken } from "./utils/auth";
+import { useAuth } from "./context/AuthContext";
 
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -48,9 +48,9 @@ export default function AppRouter() {
 
 function ProtectedRoute({ children }) {
   const location = useLocation();
-  const token = getToken();
+  const { isAuthenticated } = useAuth();
 
-  if (!token) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

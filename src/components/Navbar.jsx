@@ -1,33 +1,18 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
 
 import logo from "../assets/images/logo.png";
 import avatar from "../assets/images/avatar.png";
 import plusIcon from "../assets/images/plus-icon.png";
-import { getToken, getUser, removeToken, removeUser } from "../utils/auth";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [token, setToken] = useState(getToken());
-  const [user, setUser] = useState(getUser());
 
-  useEffect(() => {
-    const onStorage = () => {
-      setToken(getToken());
-      setUser(getUser());
-    };
-
-    window.addEventListener("storage", onStorage);
-
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
+  const { user, logout, isAuthenticated } = useAuth();
 
   const handleLogout = () => {
-    removeToken();
-    removeUser();
-    setToken(null);
-    setUser(null);
+    logout();
     navigate("/");
   };
 
@@ -80,7 +65,7 @@ export default function Navbar() {
         </div>
 
         {/* Right Side */}
-        {!token ? (
+        {!isAuthenticated ? (
           <div className="flex gap-3">
             <Link to="/login" className="px-4 py-2 text-sm font-medium">
               Login
