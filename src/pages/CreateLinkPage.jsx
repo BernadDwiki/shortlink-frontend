@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import SweetAlert from "../components/ui/SweetAlert";
 
 import backIcon from "../assets/images/back.png";
 import eyeIcon from "../assets/images/eye2.png";
@@ -11,19 +12,58 @@ import qrIcon from "../assets/images/qr-code.png";
 import linkIcon from "../assets/images/link-icon.png";
 import lightningIcon from "../assets/images/lightning.png";
 
+import { createLink } from "../services/linkService";
+
 export default function CreateLinkPage() {
+  const navigate = useNavigate();
   const [originalUrl, setOriginalUrl] = useState("");
   const [slug, setSlug] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const previewUrl = slug
-    ? `https://short.link/${slug}`
-    : "https://short.link/your-short-link";
+    ? `http://localhost:8080/${slug}`
+    : "http://localhost:8080/your-short-link";
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    // TODO:
-    // Integrasi POST /api/links
+    if (!originalUrl.trim()) {
+      setError("Please enter a destination URL");
+      return;
+    }
+
+    // Validate URL format
+    try {
+      new URL(originalUrl);
+    } catch {
+      setError("Please enter a valid URL (starting with http:// or https://)");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await createLink(originalUrl, slug);
+
+      SweetAlert.success({
+        title: "Link Created!",
+        text: `Your short link has been created: ${result.short_url}`,
+      });
+
+      // Redirect to dashboard after 2 seconds
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
+    } catch (err) {
+      setError(err.message || "Failed to create link");
+      SweetAlert.error({
+        text: err.message || "Failed to create link",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -49,6 +89,12 @@ export default function CreateLinkPage() {
           </p>
 
           <div className="mt-8 bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            {error && (
+              <div className="mb-6 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit}>
               {/* Destination URL */}
               <div>
@@ -86,7 +132,7 @@ export default function CreateLinkPage() {
 
                 <div className="flex h-11 border border-gray-200 rounded-md overflow-hidden">
                   <div className="px-4 flex items-center text-sm text-gray-600 bg-gray-50 border-r border-gray-200">
-                    short.link/
+                    http://localhost:8080/
                   </div>
 
                   <input
@@ -122,15 +168,18 @@ export default function CreateLinkPage() {
               <div className="mt-8 flex items-center gap-6">
                 <button
                   type="submit"
-                  className="h-11 px-6 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition flex items-center gap-2"
+                  disabled={loading}
+                  className="h-11 px-6 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition flex items-center gap-2 disabled:cursor-not-allowed disabled:bg-blue-400"
                 >
-                  Create Link
+                  {loading ? "Creating..." : "Create Link"}
 
-                  <img
-                    src={lightningIcon}
-                    alt="Create"
-                    className="w-3 h-3"
-                  />
+                  {!loading && (
+                    <img
+                      src={lightningIcon}
+                      alt="Create"
+                      className="w-3 h-3"
+                    />
+                  )}
                 </button>
 
                 <Link

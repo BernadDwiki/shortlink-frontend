@@ -50,3 +50,36 @@ export async function deleteLink(linkId) {
 
   return data;
 }
+
+export async function createLink(originalUrl, slug = "") {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("No authentication token found");
+  }
+
+  const payload = {
+    original_url: originalUrl,
+  };
+
+  if (slug.trim()) {
+    payload.slug = slug.trim();
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/links`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to create link");
+  }
+
+  return data.results;
+}
