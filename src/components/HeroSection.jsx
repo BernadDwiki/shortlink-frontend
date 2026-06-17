@@ -1,6 +1,30 @@
+import { useNavigate } from "react-router-dom";
 import linkIcon from "../assets/images/link-icon.png";
 
 export default function HeroSection() {
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    navigate("/register");
+  };
+
+  const handleLearnMore = () => {
+    document
+      .getElementById("features")
+      ?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleShorten = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    navigate("/dashboard");
+  };
+
   return (
     <section className="bg-[#f5f6f8] min-h-[85vh] flex items-center justify-center px-6">
       <div className="max-w-4xl w-full">
@@ -19,11 +43,17 @@ export default function HeroSection() {
 
           {/* Buttons */}
           <div className="flex justify-center gap-4 mt-10">
-            <button className="px-8 py-3 rounded-lg bg-blue-600 text-white font-medium shadow-md hover:bg-blue-700 transition">
+            <button
+              onClick={handleGetStarted}
+              className="px-8 py-3 rounded-lg bg-blue-600 text-white font-medium shadow-md hover:bg-blue-700 transition"
+            >
               Get Started
             </button>
 
-            <button className="px-8 py-3 rounded-lg border border-gray-300 bg-white text-blue-600 font-medium hover:bg-gray-50 transition">
+            <button
+              onClick={handleLearnMore}
+              className="px-8 py-3 rounded-lg border border-gray-300 bg-white text-blue-600 font-medium hover:bg-gray-50 transition"
+            >
               Learn More
             </button>
           </div>
@@ -34,7 +64,11 @@ export default function HeroSection() {
           <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex items-center flex-1 border border-gray-200 rounded-lg px-4">
-                <img src={linkIcon} alt="Link" className="w-4 h-2 mr-3" />
+                <img
+                  src={linkIcon}
+                  alt="Link"
+                  className="w-4 h-2 mr-3"
+                />
 
                 <input
                   type="text"
@@ -43,7 +77,10 @@ export default function HeroSection() {
                 />
               </div>
 
-              <button className="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition">
+              <button
+                onClick={handleShorten}
+                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+              >
                 Shorten
               </button>
             </div>
