@@ -97,7 +97,7 @@ export default function DashboardPage() {
       <main className="min-h-screen bg-[#f7f8fa]">
         <div className="max-w-4xl mx-auto px-6 py-12">
           {/* Header */}
-          <div className="flex justify-between items-start">
+          <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
                 My Links
@@ -108,7 +108,7 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="text-right">
+            <div className="text-left md:text-right">
               <p className="text-xs tracking-[0.2em] uppercase text-gray-400 font-semibold">
                 Total Active
               </p>
@@ -128,8 +128,8 @@ export default function DashboardPage() {
 
           {/* Search */}
           <div className="mt-8">
-            <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-3 flex-1">
+            <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 <img
                   src={searchIcon}
                   alt="Search"
@@ -141,7 +141,7 @@ export default function DashboardPage() {
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   placeholder="Search by URL or original address..."
-                  className="w-full outline-none text-sm"
+                  className="w-full outline-none text-sm min-w-0"
                 />
               </div>
 
@@ -185,9 +185,9 @@ export default function DashboardPage() {
                 .map((link) => (
                 <div
                   key={link.id}
-                  className="bg-white border border-gray-100 rounded-xl p-5 flex justify-between items-center"
+                  className="bg-white border border-gray-100 rounded-xl p-5 flex flex-col gap-5 sm:flex-row sm:justify-between sm:items-center"
                 >
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <img
                         src={linkIcon}

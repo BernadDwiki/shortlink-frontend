@@ -30,29 +30,29 @@ export default function HeroSection() {
       <div className="max-w-4xl w-full">
         {/* Heading */}
         <div className="text-center">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
             <span className="text-gray-900">Shorten URLs.</span>{" "}
             <span className="text-blue-600">Share Easily.</span>
           </h1>
 
-          <p className="mt-6 max-w-2xl mx-auto text-gray-500 text-lg">
+          <p className="mt-6 max-w-2xl mx-auto text-gray-500 text-base sm:text-lg">
             Create short, memorable links for your team communications.
             Transform long, cumbersome URLs into powerful digital assets that
             drive engagement.
           </p>
 
           {/* Buttons */}
-          <div className="flex justify-center gap-4 mt-10">
+          <div className="flex flex-col items-center gap-4 mt-10 sm:flex-row sm:justify-center">
             <button
               onClick={handleGetStarted}
-              className="px-8 py-3 rounded-lg bg-blue-600 text-white font-medium shadow-md hover:bg-blue-700 transition"
+              className="w-full sm:w-auto px-8 py-3 rounded-lg bg-blue-600 text-white font-medium shadow-md hover:bg-blue-700 transition"
             >
               Get Started
             </button>
 
             <button
               onClick={handleLearnMore}
-              className="px-8 py-3 rounded-lg border border-gray-300 bg-white text-blue-600 font-medium hover:bg-gray-50 transition"
+              className="w-full sm:w-auto px-8 py-3 rounded-lg border border-gray-300 bg-white text-blue-600 font-medium hover:bg-gray-50 transition"
             >
               Learn More
             </button>

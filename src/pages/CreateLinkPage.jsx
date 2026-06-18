@@ -71,7 +71,7 @@ export default function CreateLinkPage() {
       <Navbar />
 
       <main className="min-h-screen bg-gray-50">
-        <div className="max-w-2xl mx-auto px-6 py-10">
+        <div className="max-w-2xl mx-auto px-4 py-10 sm:px-6">
           <Link
             to="/dashboard"
             className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
@@ -165,7 +165,7 @@ export default function CreateLinkPage() {
               </div>
 
               {/* Actions */}
-              <div className="mt-8 flex items-center gap-6">
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
                 <button
                   type="submit"
                   disabled={loading}
