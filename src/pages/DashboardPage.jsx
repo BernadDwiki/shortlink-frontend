@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import SweetAlert from "../components/ui/SweetAlert";
@@ -7,7 +7,6 @@ import searchIcon from "../assets/images/search.png";
 import filterIcon from "../assets/images/filter.png";
 import copyIcon from "../assets/images/copy.png";
 import deleteIcon from "../assets/images/delete.png";
-import linkIcon from "../assets/images/link-icon2.png";
 
 import { getUserLinks, deleteLink } from "../services/linkService";
 
@@ -19,26 +18,34 @@ export default function DashboardPage() {
   const [copiedId, setCopiedId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
+  // pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
   useEffect(() => {
     const loadLinks = async () => {
       try {
         setLoading(true);
         setError("");
+
         const data = await getUserLinks();
-        
-        // Transform backend data to match UI structure (use backend-provided short_url)
+
         const transformedLinks = data.map((link) => ({
           id: link.id,
-          shortUrl: link.short_url || (link.slug ? `shrt.lnk/${link.slug}` : "N/A"),
+          shortUrl:
+            link.short_url ||
+            (link.slug ? `shrt.lnk/${link.slug}` : "N/A"),
           originalUrl: link.original_url,
-          date: new Date(link.created_at).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          }).toUpperCase(),
+          date: new Date(link.created_at)
+            .toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })
+            .toUpperCase(),
           clicks: "0",
         }));
-        
+
         setLinks(transformedLinks);
       } catch (err) {
         setError(err.message || "Failed to load links");
@@ -50,6 +57,26 @@ export default function DashboardPage() {
 
     loadLinks();
   }, []);
+
+  // reset page saat search berubah
+  const filteredLinks = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    if (!query) return links;
+
+    return links.filter(
+      (link) =>
+        link.shortUrl.toLowerCase().includes(query) ||
+        link.originalUrl.toLowerCase().includes(query)
+    );
+  }, [links, searchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredLinks.length / itemsPerPage));
+  const currentPageSafe = Math.min(currentPage, totalPages);
+
+  const paginatedLinks = useMemo(() => {
+    const start = (currentPageSafe - 1) * itemsPerPage;
+    return filteredLinks.slice(start, start + itemsPerPage);
+  }, [filteredLinks, currentPageSafe]);
 
   const handleCopy = async (url, id) => {
     try {
@@ -68,14 +95,15 @@ export default function DashboardPage() {
       confirmButtonText: "Yes, delete it",
       cancelButtonText: "Cancel",
     });
-    if (!confirmed) {
-      return;
-    }
+
+    if (!confirmed) return;
 
     try {
       setDeletingId(id);
       await deleteLink(id);
-      setLinks((currentLinks) => currentLinks.filter((link) => link.id !== id));
+
+      setLinks((prev) => prev.filter((l) => l.id !== id));
+
       SweetAlert.success({
         title: "Deleted!",
         text: "Your link has been deleted.",
@@ -90,162 +118,122 @@ export default function DashboardPage() {
     }
   };
 
+  const goToPage = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
+
+  const resetPagination = () => {
+    setCurrentPage(1);
+  };
+
   return (
     <>
       <Navbar />
 
       <main className="min-h-screen bg-[#f7f8fa]">
         <div className="max-w-4xl mx-auto px-6 py-12">
+
           {/* Header */}
           <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
                 My Links
               </h1>
-
               <p className="mt-2 text-sm text-gray-500">
                 Manage and track your shortened digital assets.
               </p>
             </div>
 
             <div className="text-left md:text-right">
-              <p className="text-xs tracking-[0.2em] uppercase text-gray-400 font-semibold">
+              <p className="text-xs uppercase text-gray-400 font-semibold">
                 Total Active
               </p>
-
               <h2 className="text-3xl font-bold text-blue-600">
                 {links.length}
               </h2>
             </div>
           </div>
 
-          {/* Error Message */}
+          {/* Search */}
+          <div className="mt-8">
+            <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center gap-3">
+              <img src={searchIcon} className="w-4 h-4" />
+              <input
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  resetPagination();
+                }}
+                placeholder="Search..."
+                className="w-full outline-none text-sm"
+              />
+              <img src={filterIcon} className="w-4 h-4 cursor-pointer" />
+            </div>
+          </div>
+
           {error && (
             <div className="mt-6 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
           )}
 
-          {/* Search */}
-          <div className="mt-8">
-            <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <img
-                  src={searchIcon}
-                  alt="Search"
-                  className="w-4 h-4"
-                />
-
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  placeholder="Search by URL or original address..."
-                  className="w-full outline-none text-sm min-w-0"
-                />
-              </div>
-
-              <img
-                src={filterIcon}
-                alt="Filter"
-                className="w-4 h-4 cursor-pointer"
-              />
-            </div>
-          </div>
-
-          {/* Loading State */}
+          {/* Loading */}
           {loading && (
-            <div className="mt-8 text-center">
-              <p className="text-gray-500">Loading your links...</p>
+            <div className="mt-8 text-center text-gray-500">
+              Loading your links...
             </div>
           )}
 
-          {/* Empty State */}
-          {!loading && links.length === 0 && !error && (
-            <div className="mt-8 text-center py-12">
-              <p className="text-gray-500">No links yet. Create your first shortened link!</p>
-            </div>
-          )}
-
-          {/* Links List */}
-          {!loading && (
+          {/* List */}
+          {!loading && filteredLinks.length > 0 && (
             <div className="mt-8 space-y-4">
-              {links
-                .filter((link) => {
-                  const query = searchTerm.trim().toLowerCase();
-                  if (!query) {
-                    return true;
-                  }
-
-                  return (
-                    link.shortUrl.toLowerCase().includes(query) ||
-                    link.originalUrl.toLowerCase().includes(query)
-                  );
-                })
-                .map((link) => (
+              {paginatedLinks.map((link) => (
                 <div
                   key={link.id}
-                  className="bg-white border border-gray-100 rounded-xl p-5 flex flex-col gap-5 sm:flex-row sm:justify-between sm:items-center"
+                  className="bg-white border border-gray-100 rounded-xl p-5 flex justify-between"
                 >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={linkIcon}
-                        alt="Link"
-                        className="w-4 h-2"
-                      />
+                  <div>
+                    <a
+                      href={link.shortUrl}
+                      className="text-blue-600 font-semibold hover:underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {link.shortUrl}
+                    </a>
 
-                      <a
-                        href={link.shortUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 font-semibold hover:underline"
-                      >
-                        {link.shortUrl}
-                      </a>
-                    </div>
-
-                    <p className="mt-2 text-sm text-gray-500 truncate max-w-md">
+                    <p className="text-sm text-gray-500 truncate">
                       {link.originalUrl}
                     </p>
 
-                    <p className="mt-3 text-xs tracking-widest text-gray-400 uppercase">
-                      {link.date} • {link.clicks} Clicks
+                    <p className="text-xs text-gray-400 mt-2">
+                      {link.date}
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <div className="flex flex-col items-center">
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="flex gap-3 items-center">
                       <button
-                        type="button"
                         onClick={() => handleCopy(link.shortUrl, link.id)}
-                        className="transition-transform hover:scale-105"
+                        className="hover:scale-105 transition"
                       >
-                        <img
-                          src={copyIcon}
-                          alt="Copy"
-                          className="w-10 h-10"
-                        />
+                        <img src={copyIcon} className="w-10 h-10" />
                       </button>
-                      {copiedId === link.id && (
-                        <span className="text-xs text-green-600 mt-1">Copied</span>
-                      )}
+
+                      <button
+                        onClick={() => handleDelete(link.id)}
+                        disabled={deletingId === link.id}
+                        className="hover:scale-105 transition disabled:opacity-50"
+                      >
+                        <img src={deleteIcon} className="w-10 h-10" />
+                      </button>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(link.id)}
-                      className="transition-transform hover:scale-105"
-                      disabled={deletingId === link.id}
-                    >
-                      <img
-                        src={deleteIcon}
-                        alt="Delete"
-                        className="w-10 h-10"
-                      />
-                    </button>
-                    {deletingId === link.id && (
-                      <span className="text-xs text-gray-500 mt-1">Deleting...</span>
+                    {copiedId === link.id && (
+                      <span className="text-xs text-green-600">
+                        Copied!
+                      </span>
                     )}
                   </div>
                 </div>
@@ -253,24 +241,45 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Pagination */}
-          {!loading && links.length > 0 && (
-            <div className="mt-10 flex items-center justify-between text-sm text-gray-500">
-              <button className="hover:text-blue-600 transition">
-                ‹ Prev Page
+          {/* Pagination FIXED & CLEAN */}
+          {!loading && totalPages > 1 && (
+            <div className="mt-10 flex items-center justify-between text-sm">
+              
+              {/* Prev */}
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-3 py-1 rounded text-gray-500 hover:text-blue-600 disabled:opacity-40"
+              >
+                ‹ Prev
               </button>
 
-              <div className="flex items-center gap-3">
-                <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded">
-                  1
-                </span>
-
-                <span>of</span>
-
-                <span>1</span>
+              {/* Pages */}
+              <div className="flex items-center gap-2">
+                {Array.from({ length: totalPages }).map((_, i) => {
+                  const page = i + 1;
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => goToPage(page)}
+                      className={`px-3 py-1 rounded transition border border-transparent ${
+                        currentPage === page
+                          ? "bg-blue-600 text-white shadow"
+                          : "text-gray-500 hover:bg-gray-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
               </div>
 
-              <button className="hover:text-blue-600 transition">
+              {/* Next */}
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 rounded text-gray-500 hover:text-blue-600 disabled:opacity-40"
+              >
                 Next ›
               </button>
             </div>
