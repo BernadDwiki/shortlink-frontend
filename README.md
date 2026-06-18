@@ -30,7 +30,17 @@ The frontend communicates with the Shortlink Backend REST API and provides a sea
 
 ## Preview
 
-Screenshots are not included in this repository.
+### Landing Page
+
+![Landing Page](./src/assets/landing-page.png)
+
+### Login Page
+
+![Login Page](./src/assets/login-page.png)
+
+### Dashboard
+
+![Dashboard](./src/assets/dashboard-page.png)
 
 ---
 
@@ -118,23 +128,15 @@ shortlink-frontend/
 ## 1. Clone Repository
 
 ```bash
-git clone https://github.com/<your-username>/<your-repository>.git
-cd <your-repository>/shortlink-frontend
+git clone https://github.com/BernadDwiki/shortlink-frontend.git
+cd shortlink-frontend
 ```
-
-If the repository contains both backend and frontend folders in the same root, clone the repo and then change into `shortlink-frontend`.
 
 ---
 
 ## 2. Environment Configuration
 
-Copy `example.env` to `.env` and update it if needed:
-
-```bash
-cp example.env .env
-```
-
-Example `.env` contents:
+Create a `.env` file in the project root:
 
 ```env
 VITE_API_URL=http://localhost:8080
@@ -190,7 +192,7 @@ Build files will be generated inside:
 dist/
 ```
 
-Preview the production build locally:
+Preview production build locally:
 
 ```bash
 npm run preview
