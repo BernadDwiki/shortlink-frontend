@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
@@ -9,6 +11,23 @@ import linkIcon from "../assets/images/link-icon2.png";
 import logoutIcon from "../assets/images/logout.png";
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const displayName = user?.email ? user.email.split("@")[0] : "User";
+  const joinedDate = user?.created_at
+    ? new Date(user.created_at).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "N/A";
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
     <>
       <Navbar />
@@ -50,11 +69,11 @@ export default function ProfilePage() {
 
                 <div>
                   <h2 className="font-semibold text-gray-900">
-                    Alex Thompson
+                    {displayName}
                   </h2>
 
                   <p className="text-sm text-gray-500">
-                    Product Architect at Digital Flow
+                    {user?.email || "No email available"}
                   </p>
                 </div>
               </div>
@@ -67,7 +86,7 @@ export default function ProfilePage() {
                   </p>
 
                   <p className="mt-2 text-sm text-gray-800">
-                    user@example.com
+                    {user?.email || "Not available"}
                   </p>
                 </div>
 
@@ -77,7 +96,7 @@ export default function ProfilePage() {
                   </p>
 
                   <p className="mt-2 text-sm text-gray-800">
-                    Member since: January 1, 2026
+                    Member since: {joinedDate}
                   </p>
                 </div>
               </div>
@@ -146,7 +165,10 @@ export default function ProfilePage() {
 
               {/* Logout */}
               <div className="mt-8">
-                <button className="w-full h-11 border border-gray-200 rounded-lg flex items-center justify-center gap-2 text-gray-600 hover:bg-gray-50 transition">
+                <button
+                  onClick={handleLogout}
+                  className="w-full h-11 border border-gray-200 rounded-lg flex items-center justify-center gap-2 text-gray-600 hover:bg-gray-50 transition"
+                >
                   <img
                     src={logoutIcon}
                     alt="Logout"
